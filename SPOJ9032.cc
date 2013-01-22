@@ -1,4 +1,4 @@
-// SPOJ 9032. Cube Free Numbers
+// SPOJ 9032: Cube Free Numbers
 // http://www.spoj.com/problems/CUBEFR/
 //
 // Solution: DP (sieve)
