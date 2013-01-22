@@ -1,4 +1,4 @@
-// SPOJ 5976 Traversing Grid
+// SPOJ 5976: Traversing Grid
 // http://www.spoj.com/problems/TRGRID/
 // 
 // Solution: Ad-Hoc
