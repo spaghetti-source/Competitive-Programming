@@ -1,4 +1,4 @@
-// SPOJ 6256 Inversion Count
+// SPOJ 6256: Inversion Count
 // http://www.spoj.com/problems/INVCNT/
 //
 // Solution: sorting (inversion counting)
