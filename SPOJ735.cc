@@ -1,4 +1,4 @@
-// SPOJ 735 Minimum Diameter Spanning Tree
+// SPOJ 735: Minimum Diameter Spanning Tree
 //
 // Solution: T/O.
 #include <iostream>
