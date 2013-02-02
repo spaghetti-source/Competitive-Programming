@@ -2,10 +2,6 @@
 //
 // Solution: Minimum Diameter Spanning Tree
 //
-// Explicit tree construction is needed.
-// It is a little hard.
-//
-//
 #include <iostream>
 #include <cstdio>
 #include <queue>
@@ -17,10 +13,11 @@ using namespace std;
 #define ALL(c) c.begin(), c.end()
 #define FOR(i,c) for(typeof(c.begin())i=c.begin();i!=c.end();++i)
 #define REP(i,n) for(int i=0;i<n;++i)
+
+typedef pair<int,int> PII;
 #define fst first
 #define snd second
 
-typedef pair<int, int> PII;
 typedef int Weight;
 const Weight INF = 1 << 28;
 struct Graph {
@@ -43,9 +40,7 @@ struct Graph {
     edge.push_back(Edge(s, t, w));
   }
 
-
-
-  vector<int> R; // radius
+  vector<int> R; // radius from the absolute center
   vector<bool> visited;
   void traverse(int u, int sh = 0) { // explicit construction of sp-tree
     visited[u] = true;
@@ -71,7 +66,7 @@ struct Graph {
   }
   Weight minimumDiameterSpanningTree() {
     farthestOrdering(); // preprocessing
-    int h, D = INF;
+    Weight h, D = INF;
     Edge &e = edge[0];
     FOR(it, edge) {
       int s = it->s, t = it->t; // for simplicity
@@ -79,23 +74,20 @@ struct Graph {
       if (d[s][L[t][0]] + d[t][L[s][0]] + w > 2*D) continue; // Halpern bound
       if (L[s][0] == L[t][0]) continue; // no-coincide condition
 
-      vector<PII> a;
-      for (int i = n-1; i >= 0; --i) {
-        pair<int,int> p = make_pair(d[s][L[s][i]], d[t][L[s][i]]);
-        while (!a.empty() && a.back().snd <= p.snd) a.pop_back();
-        a.push_back(p);
+      vector<int> &v = L[s];
+      int k = 0; // last active constraint
+      Weight x = 0, y = min(d[s][v[0]], d[t][v[0]] + w), xi, yi;
+      for (int i = 1; i < n; ++i) {
+        if (d[t][v[k]] < d[t][v[i]]) { // i is active
+          xi = (d[t][v[k]] - d[s][v[i]] + w) / 2;
+          yi = xi + d[s][v[i]];
+          if (yi < y) { y = yi; x = xi; } 
+          k = i;
+        }
       }
-      reverse(ALL(a));
-
-      int x = 0, y = a[0].fst; 
-      if (a[t].snd < y) { x = w; y = a.back().snd; }
-      REP(i, a.size()-1) {
-        int ay = (a[i].snd + a[i+1].fst + w)/2;
-        if (ay < y) { y = ay; x = ay - a[i+1].fst; }
-      }
-      int De = 0;
-      REP(i, n) De = max(De, min(d[s][i]+x, d[t][i]+w-x));
-      if (De < D) { D = De; h = x; e = *it; }
+      yi = min(d[s][v[k]]+w, d[t][v[k]]); 
+      if (yi < y) { y = yi; x = 1; } 
+      if (y < D) { D = y; h = x; e = *it; }
     }
     printf("%d\n", D); 
     R.resize(n); // explicit reconstruction by DFS
