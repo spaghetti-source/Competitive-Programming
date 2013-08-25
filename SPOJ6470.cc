@@ -1,7 +1,7 @@
 // SPOJ 6470: Finding the Kth Prime
 // http://www.spoj.com/problems/TDKPRIME/
 //
-// Solution: prime sieve / offline computing
+// Solution: prime sieve
 
 #include <iostream>
 #include <cstdio>
@@ -19,27 +19,33 @@ using namespace std;
 #define fst first
 #define snd second
 
-// 18 lines; simple, and sufficient
-int p[6000000] = {2}, ptop = 1;
-const int NMAX = 100000010;
-unsigned int _BV[NMAX/64];
-#define _PRIME(n) !(_BV[n/64] & (1<<((n/2)&31)))
-#define _COMPOSITE(n) (_BV[n/64] |= (1<<((n/2)&31)))
-void sieve(int n) {
-  unsigned int i, j;
-  memset(_BV, 0, sizeof(_BV));
-  for (i = 3; i*i < n; i+=2) 
-    if (_PRIME(i)) {
-      p[ptop++] = i;
-      for (j = i*i; j < n; j += 2*i)
-        _COMPOSITE(j);
-    }
-  for (; i < n; i+=2)
-    if (_PRIME(i)) p[ptop++] = i;
+vector<int> primeList(int n) {
+  const int M = 1 << 14, SQR = 1 << 16;
+  static bool buf[M], Q[SQR];
+  // primality table
+  for (int i = 3; i*i < SQR; i+=2)
+    if (!Q[i])
+      for (int j = i*i; j < SQR; j += 2*i)
+        Q[j] = 1;
+  // segmented sieve
+  vector<int> primes(1,2);
+  vector< pair<int,int> > P; // (2 * prime, next to sieve)
+  for (int s = 3, k = 3, low = 0; low < n; low += M) {
+    int high = min(low + M, n);
+    bool *S = buf - low;
+    memset(buf, 0, sizeof(buf));
+    for (; s*s < high; s+=2)
+      if (!Q[s]) P.push_back(make_pair(2*s, s*s));
+    FOR(p, P) for (; p->snd < high; p->snd += p->fst) S[p->snd] = 1;
+    for (; k < high; k+=2)
+      if (!S[k]) primes.push_back(k);
+    if (primes.size() > 5000000) break;
+  }
+  return primes;
 }
 
 int main() {
-  sieve(100000000);
+  vector<int> p = primeList(100000000);
   int T; scanf("%d", &T);
   while (T--) {
     int k; scanf("%d", &k);
